@@ -29,3 +29,5 @@ coverage_include/
 .vscode/settings.json
 source/web.cpp
 third-party/Empirical
+third-party/Empirical
+.vscode/c_cpp_properties.json

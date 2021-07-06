@@ -6,4 +6,8 @@ EMP_BUILD_CONFIG(Config,
                  GROUP(MAIN, "Global settings"),
                  VALUE(ITERATIONS, double, 320, "Number of iterations"),
                  VALUE(POPULATION_SIZE, double, 10, "Population size"),
-                 VALUE(RECORD_EVERY_NTH, int, 32, "Records every n-th generation in the table (0 gives a default)"))
+                 VALUE(RECORD_EVERY_NTH, int, 32, "Records every n-th generation in the table (0 gives a default)"),
+                 GROUP(TEST, "Test another group"),
+                 VALUE(TEXT, std::string, "Hi \"there", "Some text"),
+                 VALUE(MORE_TEXT, std::string, "Bye now", "Some more text"),
+                 )
