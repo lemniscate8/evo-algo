@@ -14,6 +14,7 @@
 #include "emp/config/ArgManager.hpp"
 #include "emp/prefab/ConfigPanel.hpp"
 #include "emp/prefab/Card.hpp"
+#include "emp/prefab/ValueBox.hpp"
 #include "emp/web/UrlParams.hpp"
 
 // global variable...
@@ -113,22 +114,27 @@ emp::web::Button startStop([]() {
 
 emp::web::Element resetWithParams("a", "resetWithParams");
 
+
 int main()
 {
-  emp::prefab::ConfigPanel config_panel(cfg);
   auto specs = emp::ArgManager::make_builtin_specs(&cfg);
   emp::ArgManager am(emp::web::GetUrlParams(), specs);
   am.UseCallbacks();
   if (am.HasUnused())
     std::exit(EXIT_FAILURE);
-  config_panel.Setup();
-  
-  config_panel.SetOnChangeFun([&](const std::string & val){
-    resetWithParams.SetAttr("href", "?ITERATIONS="+std::to_string(cfg.ITERATIONS()));
-    resetWithParams.Redraw();
+  cfg["MORE_TEXT"]->SetType("unknown");
+
+  emp::prefab::ConfigPanel config_panel(cfg);
+  config_panel.ExcludeSetting("RECORD_EVERY_NTH");
+  // config_panel.ExcludeGroup("TEST");
+  //config_panel.ExcludeGroup("NONE");
+  config_panel.SetRange("ITERATIONS", "DEFAULT", "500");
+
+  config_panel.SetOnChangeFun([](const std::string & name, const std::string & val){
     EM_ASM({
       console.log(UTF8ToString($0));
-    }, val.c_str());
+      console.log(UTF8ToString($1));
+    }, name.c_str(), val.c_str());
   });
 
   animator.emplace(cfg.ITERATIONS(), cfg.RECORD_EVERY_NTH());
@@ -139,20 +145,60 @@ int main()
 
   doc << config_panel;
 
-  emp::web::Div one;
-  emp::web::Div two;
-  emp::web::Div three;
-  emp::web::Div four;
-  one << two;
-  one << three;
-  three << four;
-  doc << one;
+  doc << emp::prefab::ValueDisplay("Hi 1", "HI!!!", "Hi there 1");
+
+  // emp::web::Div holder;
+  // emp::prefab::ValueDisplay vb1("Hi 1", "HI!!!", "Hi there 1");
+  // emp::prefab::ValueDisplay vb2("Hi 2 me hlajfd;lajsdf", "HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII!!!", "Hi there 2");
+  // emp::prefab::TextValueControl vb3{
+  //   "TC 1", "Text control 1", "initial",
+  //   [](std::string val) {
+  //     std::cout << val << std::endl;
+  //   }
+  // };
+  // emp::prefab::BoolValueControl vb4{
+  //   "BC 1", "Boolean control 1", true,
+  //   [](std::string val) {
+  //     std::cout << val << std::endl;
+  //   }
+  // };
+  // emp::prefab::NumericValueControl vb5{
+  //   "NC 1", "Numeric control 1", "15",
+  //   [](std::string val) {
+  //     std::cout << val << std::endl;
+  //   }
+  // };
+  // holder << vb1;
+  // holder << vb2;
+  // holder << vb3;
+  // holder << vb4;
+  // holder << vb5.Children();
+
+  // holder.SetCSS(
+  //   "display", "grid",
+  //   "grid-template-columns", "repeat(auto-fill, minmax(300px, 1fr))",
+  //   "align-items", "start"
+  // );
+  // doc << holder;
+  emp::vector<emp::web::Div> divVec({emp::web::Div("one"), emp::web::Div("two"), emp::web::Div("three")});
+  emp::vector<std::string> stringVec({"hi", "why", "bye"});
+  emp::web::Div tester1("tester1");
+  emp::web::Div tester2("tester2");
+  emp::web::Div tester3("tester3");
+  doc << tester1;
+  doc << tester2;
+  doc << tester3;
+  tester1 << divVec;
+  tester2 << stringVec;
+  tester3 << []() { return "Handles lambdas"; };
+
+
 
   emp::prefab::Card card("INIT_OPEN");
   doc << card;
   card << "Hi there";
-  emp::web::Input in([](std::string val){;}, "text", "Test");
-  doc << in;
+  emp::web::Input in([](std::string val){ EM_ASM({ console.log(UTF8ToString($0)) }, val.c_str()); }, "text", "Test");
+  card << in;
   //in.Value("hi there\"/> <script> alert(\"hi there\"); </script> <input style='display: none'");
 
   doc << startStop.AddAttr("class", "btn btn-primary");
